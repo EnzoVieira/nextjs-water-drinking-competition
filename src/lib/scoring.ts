@@ -3,6 +3,7 @@ import { differenceInCalendarDays } from "date-fns";
 export interface UserScore {
   userId: string;
   userName: string;
+  userImage: string | null;
   totalMl: number;
   longestStreak: number;
   volumeScore: number;

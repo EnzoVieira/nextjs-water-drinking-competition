@@ -14,7 +14,7 @@ export async function GET(
 
   const members = await prisma.competitionMember.findMany({
     where: { competitionId },
-    include: { user: { select: { id: true, name: true } } },
+    include: { user: { select: { id: true, name: true, image: true } } },
   });
 
   const scores: UserScore[] = await Promise.all(
@@ -31,6 +31,7 @@ export async function GET(
       return {
         userId: member.user.id,
         userName: member.user.name,
+        userImage: member.user.image,
         totalMl,
         longestStreak,
         volumeScore,

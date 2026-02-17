@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-session";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogoutButton } from "@/components/logout-button";
+import { NavProfile } from "@/components/nav-profile";
 
 export default async function AppLayout({
   children,
@@ -20,9 +20,12 @@ export default async function AppLayout({
             Water Tracker
           </Link>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{user.name}</span>
             <ThemeToggle />
-            <LogoutButton />
+            <NavProfile
+              name={user.name}
+              email={user.email}
+              image={user.image ?? null}
+            />
           </div>
         </div>
       </nav>

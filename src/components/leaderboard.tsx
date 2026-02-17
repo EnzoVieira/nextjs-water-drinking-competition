@@ -10,7 +10,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
 
 interface LeaderboardProps {
   scores: UserScore[];
@@ -49,7 +59,17 @@ export function Leaderboard({ scores, currentUserId }: LeaderboardProps) {
                   )}
                 >
                   <TableCell>{i + 1}</TableCell>
-                  <TableCell>{score.userName}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Avatar size="sm">
+                        {score.userImage && (
+                          <AvatarImage src={score.userImage} alt={score.userName} />
+                        )}
+                        <AvatarFallback>{getInitials(score.userName)}</AvatarFallback>
+                      </Avatar>
+                      {score.userName}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     {(score.totalMl / 1000).toFixed(1)}L
                   </TableCell>
