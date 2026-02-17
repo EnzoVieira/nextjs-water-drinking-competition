@@ -68,13 +68,13 @@ export default function CompetitionDetailPage() {
 
   if (loading) {
     return (
-      <div className="text-center py-12 text-gray-500">Loading...</div>
+      <div className="text-center py-12 text-muted-foreground">Loading...</div>
     );
   }
 
   if (!competition) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-muted-foreground">
         Competition not found or you are not a member.
       </div>
     );
@@ -85,9 +85,11 @@ export default function CompetitionDetailPage() {
       <div>
         <h1 className="text-2xl font-bold">{competition.name}</h1>
         {competition.description && (
-          <p className="text-gray-600 mt-1">{competition.description}</p>
+          <p className="text-muted-foreground mt-1">
+            {competition.description}
+          </p>
         )}
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           {format(new Date(competition.startDate), "MMM d")} &ndash;{" "}
           {format(new Date(competition.endDate), "MMM d, yyyy")} &middot;{" "}
           {competition.memberCount} members &middot; Created by{" "}

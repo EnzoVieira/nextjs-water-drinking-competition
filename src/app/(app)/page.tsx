@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CompetitionCard } from "@/components/competition-card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -47,41 +49,31 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">My Competitions</h1>
         <div className="flex gap-2">
-          <Link
-            href="/competitions/join"
-            className="border border-gray-300 rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
-          >
-            Join
-          </Link>
-          <Link
-            href="/competitions/new"
-            className="bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
-          >
-            Create
-          </Link>
+          <Button variant="outline" asChild>
+            <Link href="/competitions/join">Join</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/competitions/new">Create</Link>
+          </Button>
         </div>
       </div>
 
       {competitionsWithRank.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow">
-          <p className="text-gray-500 mb-4">
-            You haven&apos;t joined any competitions yet.
-          </p>
-          <div className="flex justify-center gap-3">
-            <Link
-              href="/competitions/join"
-              className="border border-gray-300 rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-50"
-            >
-              Join with Code
-            </Link>
-            <Link
-              href="/competitions/new"
-              className="bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-blue-700"
-            >
-              Create One
-            </Link>
-          </div>
-        </div>
+        <Card>
+          <CardContent className="text-center py-12">
+            <p className="text-muted-foreground mb-4">
+              You haven&apos;t joined any competitions yet.
+            </p>
+            <div className="flex justify-center gap-3">
+              <Button variant="outline" asChild>
+                <Link href="/competitions/join">Join with Code</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/competitions/new">Create One</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {competitionsWithRank.map((comp) => (

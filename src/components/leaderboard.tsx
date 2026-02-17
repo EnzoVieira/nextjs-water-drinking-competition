@@ -1,6 +1,16 @@
 "use client";
 
 import type { UserScore } from "@/lib/scoring";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 interface LeaderboardProps {
   scores: UserScore[];
@@ -9,47 +19,52 @@ interface LeaderboardProps {
 
 export function Leaderboard({ scores, currentUserId }: LeaderboardProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-5">
-      <h3 className="font-semibold mb-3">Leaderboard</h3>
-      {scores.length === 0 ? (
-        <p className="text-sm text-gray-500">No participants yet.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-500 border-b">
-                <th className="pb-2 pr-2">#</th>
-                <th className="pb-2 pr-2">Name</th>
-                <th className="pb-2 pr-2 text-right">Volume</th>
-                <th className="pb-2 pr-2 text-right">Streak</th>
-                <th className="pb-2 text-right">Score</th>
-              </tr>
-            </thead>
-            <tbody>
+    <Card>
+      <CardHeader>
+        <CardTitle>Leaderboard</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {scores.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No participants yet.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10">#</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead className="text-right">Volume</TableHead>
+                <TableHead className="text-right">Streak</TableHead>
+                <TableHead className="text-right">Score</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {scores.map((score, i) => (
-                <tr
+                <TableRow
                   key={score.userId}
-                  className={
-                    score.userId === currentUserId
-                      ? "bg-blue-50 font-medium"
-                      : ""
-                  }
+                  className={cn(
+                    score.userId === currentUserId &&
+                      "bg-primary/10 font-medium"
+                  )}
                 >
-                  <td className="py-2 pr-2">{i + 1}</td>
-                  <td className="py-2 pr-2">{score.userName}</td>
-                  <td className="py-2 pr-2 text-right">
+                  <TableCell>{i + 1}</TableCell>
+                  <TableCell>{score.userName}</TableCell>
+                  <TableCell className="text-right">
                     {(score.totalMl / 1000).toFixed(1)}L
-                  </td>
-                  <td className="py-2 pr-2 text-right">
+                  </TableCell>
+                  <TableCell className="text-right">
                     {score.longestStreak}d
-                  </td>
-                  <td className="py-2 text-right">{score.combinedScore}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {score.combinedScore}
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
   );
 }
