@@ -45,12 +45,14 @@ src/
 ```
 
 Key directories:
+
 - `prisma/` — Schema definition + migrations. Config in root `prisma.config.ts`
 - `src/generated/prisma/` — Auto-generated Prisma client (gitignored)
 
 ## Database
 
 Schema lives in `prisma/schema.prisma`. Four models:
+
 - **User** — identified by unique `name`
 - **Competition** — has `inviteCode` (nanoid), date range, creator
 - **CompetitionMember** — join table with `@@unique([userId, competitionId])`
@@ -65,6 +67,7 @@ All API routes return JSON. Error shape: `{ error: string }`. Success shape: res
 Status codes used: 200, 201, 400, 401, 403, 404.
 
 REST endpoints:
+
 - `GET/POST /api/competitions` — list user's competitions / create + auto-join
 - `POST /api/competitions/join` — join by invite code `{ code }`
 - `GET /api/competitions/[id]` — competition details (members only)
@@ -90,6 +93,10 @@ Streak = longest run of consecutive calendar days with at least one entry.
 - Component exports: `export function ComponentName()` (named exports)
 - Server Actions: suffixed with `Action` (`loginAction`, `logoutAction`)
 - Props interfaces: `ComponentNameProps`, co-located in same file
+
+## Adding New Feature or Fixing Bugs
+
+**IMPORTANT**: When you work on a new feature or bug, create a git branch first. Then, work on change in that branch for the remainder of the session.
 
 ## Additional Documentation
 
