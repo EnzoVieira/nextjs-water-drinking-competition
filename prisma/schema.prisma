@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  waterEntries         WaterEntry[]
+  competitionMembers   CompetitionMember[]
+  createdCompetitions  Competition[]
+}
+
+model Competition {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  inviteCode  String   @unique
+  createdAt   DateTime @default(now())
+  createdById String
+
+  createdBy   User               @relation(fields: [createdById], references: [id])
+  members     CompetitionMember[]
+  waterEntries WaterEntry[]
+}
+
+model CompetitionMember {
+  id            String   @id @default(cuid())
+  joinedAt      DateTime @default(now())
+  userId        String
+  competitionId String
+
+  user        User        @relation(fields: [userId], references: [id])
+  competition Competition @relation(fields: [competitionId], references: [id])
+
+  @@unique([userId, competitionId])
+}
+
+model WaterEntry {
+  id            String   @id @default(cuid())
+  amount        Int
+  date          DateTime @db.Date
+  createdAt     DateTime @default(now())
+  userId        String
+  competitionId String
+
+  user        User        @relation(fields: [userId], references: [id])
+  competition Competition @relation(fields: [competitionId], references: [id])
+
+  @@index([userId, competitionId, date])
+}
