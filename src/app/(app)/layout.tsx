@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { logoutAction } from "@/app/actions/auth";
+import { getCurrentUser } from "@/lib/auth-session";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LogoutButton } from "@/components/logout-button";
 
 export default async function AppLayout({
   children,
@@ -23,11 +22,7 @@ export default async function AppLayout({
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">{user.name}</span>
             <ThemeToggle />
-            <form action={logoutAction}>
-              <Button type="submit" variant="ghost" size="sm">
-                Logout
-              </Button>
-            </form>
+            <LogoutButton />
           </div>
         </div>
       </nav>

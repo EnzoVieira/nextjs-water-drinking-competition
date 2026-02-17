@@ -7,7 +7,7 @@ Competitive drinking water tracker for office employees. Users create/join compe
 - **Framework**: Next.js 16 (App Router) + React 19 + TypeScript 5 (strict)
 - **Database**: PostgreSQL 16 (Docker) + Prisma 7 ORM with `@prisma/adapter-pg` driver adapter
 - **Styling**: Tailwind CSS v4
-- **Auth**: Cookie-based sessions (`userId` cookie, no auth library)
+- **Auth**: Better Auth (email/password) with Prisma adapter + `nextCookies()` plugin
 - **Utilities**: `nanoid` (invite codes), `date-fns` v4 (date math)
 
 ## Commands
@@ -27,18 +27,20 @@ npx tsc --noEmit                        # Type-check without emitting
 src/
 ├── lib/                    # Singletons + pure business logic
 │   ├── prisma.ts           # DB client (globalThis singleton with PrismaPg adapter)
-│   ├── auth.ts             # Cookie-based getCurrentUser/loginUser/logoutUser
+│   ├── auth.ts             # Better Auth server instance (config + Prisma adapter)
+│   ├── auth-session.ts     # getSession/getCurrentUser helpers for server components/API routes
+│   ├── auth-client.ts      # createAuthClient() for client components
 │   └── scoring.ts          # Volume + streak scoring (pure functions)
 ├── app/
 │   ├── layout.tsx          # Root HTML shell (fonts, Tailwind)
 │   ├── globals.css         # Tailwind base import
-│   ├── actions/auth.ts     # Server Actions for login/logout forms
 │   ├── login/page.tsx      # Public login page (server component)
 │   ├── (app)/              # Auth-guarded route group (redirect if no session)
 │   │   ├── layout.tsx      # Auth guard + nav bar
 │   │   ├── page.tsx        # Dashboard — server component, lists competitions
 │   │   └── competitions/   # new/, join/, [competitionId]/ pages
 │   └── api/                # REST endpoints
+│       ├── auth/[...all]/   # Better Auth catch-all handler (GET + POST)
 │       ├── me/             # GET current user (for client components)
 │       └── competitions/   # CRUD, join, entries, leaderboard, heatmap
 └── components/             # Reusable client components (flat directory)
@@ -51,9 +53,12 @@ Key directories:
 
 ## Database
 
-Schema lives in `prisma/schema.prisma`. Four models:
+Schema lives in `prisma/schema.prisma`. Seven models:
 
-- **User** — identified by unique `name`
+- **User** — identified by unique `email`, has `name`, relations to sessions/accounts
+- **Session** — Better Auth session (token, expiresAt, ipAddress, userAgent)
+- **Account** — Better Auth account (providerId, password for credentials)
+- **Verification** — Better Auth email verification tokens
 - **Competition** — has `inviteCode` (nanoid), date range, creator
 - **CompetitionMember** — join table with `@@unique([userId, competitionId])`
 - **WaterEntry** — `amount` (ml, Int), `date` (@db.Date), indexed on `[userId, competitionId, date]`
@@ -91,7 +96,7 @@ Streak = longest run of consecutive calendar days with at least one entry.
 - Dynamic route params: **camelCase** in brackets (`[competitionId]`)
 - Page exports: `export default function XxxPage()` / `XxxLayout()`
 - Component exports: `export function ComponentName()` (named exports)
-- Server Actions: suffixed with `Action` (`loginAction`, `logoutAction`)
+- Auth client calls: `authClient.signIn.email()`, `authClient.signUp.email()`, `authClient.signOut()`
 - Props interfaces: `ComponentNameProps`, co-located in same file
 
 ## Adding New Feature or Fixing Bugs

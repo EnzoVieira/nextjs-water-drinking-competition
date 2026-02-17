@@ -1,26 +1,30 @@
 # Architectural Patterns
 
-## 1. Inline Auth Guard
+## 1. Inline Auth Guard (Better Auth)
 
-Every API route and server component checks auth immediately at the top. There is no Next.js middleware — auth is duplicated inline.
+Auth is powered by Better Auth with email/password. The server instance lives in `src/lib/auth.ts` and session helpers in `src/lib/auth-session.ts`. The client-side auth client lives in `src/lib/auth-client.ts`.
+
+Every API route and server component calls `getCurrentUser()` from `@/lib/auth-session` at the top. There is no Next.js middleware — auth is duplicated inline.
 
 **API routes** — return 401 JSON:
 ```
-src/app/api/competitions/route.ts:7-8
-src/app/api/competitions/[competitionId]/route.ts:9-10
-src/app/api/competitions/[competitionId]/entries/route.ts:9-10
-src/app/api/competitions/[competitionId]/entries/[entryId]/route.ts:9-10
-src/app/api/competitions/[competitionId]/leaderboard/route.ts:10-11
-src/app/api/competitions/[competitionId]/heatmap/route.ts:10-11
-src/app/api/competitions/join/route.ts:6-7
-src/app/api/me/route.ts:5-6
+src/app/api/competitions/route.ts
+src/app/api/competitions/[competitionId]/route.ts
+src/app/api/competitions/[competitionId]/entries/route.ts
+src/app/api/competitions/[competitionId]/entries/[entryId]/route.ts
+src/app/api/competitions/[competitionId]/leaderboard/route.ts
+src/app/api/competitions/[competitionId]/heatmap/route.ts
+src/app/api/competitions/join/route.ts
+src/app/api/me/route.ts
 ```
 
 **Server components/layouts** — redirect to `/login`:
 ```
-src/app/(app)/layout.tsx:11-12
-src/app/login/page.tsx:6-7 (reverse: redirect to / if already logged in)
+src/app/(app)/layout.tsx (redirect if no session)
+src/app/login/page.tsx (reverse: redirect to / if already logged in)
 ```
+
+**Auth catch-all route**: `src/app/api/auth/[...all]/route.ts` handles all Better Auth endpoints (sign-in, sign-up, sign-out, etc.).
 
 ## 2. Membership Guard
 
@@ -65,13 +69,12 @@ src/app/(app)/competitions/join/page.tsx              — form with local state
 src/components/*.tsx                                  — all interactive
 ```
 
-## 5. Server Actions vs REST API
+## 5. Auth Client vs REST API
 
-**Server Actions** (`"use server"`) handle auth form submissions only:
-```
-src/app/actions/auth.ts:1-16
-```
-Used via `<form action={loginAction}>` and `<form action={logoutAction}>`.
+**Auth actions** use the Better Auth client (`src/lib/auth-client.ts`):
+- Sign in: `authClient.signIn.email({ email, password })`
+- Sign up: `authClient.signUp.email({ name, email, password })`
+- Sign out: `authClient.signOut()` with `onSuccess` redirect
 
 **REST endpoints** handle all data mutations (entries, competitions, joins). Client components call these via `fetch()`.
 

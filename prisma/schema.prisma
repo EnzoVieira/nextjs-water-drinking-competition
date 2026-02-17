@@ -9,12 +9,20 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  name      String   @unique
+  name      String
   createdAt DateTime @default(now())
 
-  waterEntries         WaterEntry[]
-  competitionMembers   CompetitionMember[]
-  createdCompetitions  Competition[]
+  waterEntries        WaterEntry[]
+  competitionMembers  CompetitionMember[]
+  createdCompetitions Competition[]
+  email               String
+  emailVerified       Boolean             @default(false)
+  image               String?
+  updatedAt           DateTime            @updatedAt
+  sessions            Session[]
+  accounts            Account[]
+
+  @@unique([email])
 }
 
 model Competition {
@@ -27,8 +35,8 @@ model Competition {
   createdAt   DateTime @default(now())
   createdById String
 
-  createdBy   User               @relation(fields: [createdById], references: [id])
-  members     CompetitionMember[]
+  createdBy    User                @relation(fields: [createdById], references: [id])
+  members      CompetitionMember[]
   waterEntries WaterEntry[]
 }
 
@@ -56,4 +64,49 @@ model WaterEntry {
   competition Competition @relation(fields: [competitionId], references: [id])
 
   @@index([userId, competitionId, date])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
 }

@@ -1,10 +1,19 @@
 import { z } from "zod";
 
-export const loginSchema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
+export const signInSchema = z.object({
+  email: z.string().trim().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export type LoginValues = z.infer<typeof loginSchema>;
+export type SignInValues = z.infer<typeof signInSchema>;
+
+export const signUpSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  email: z.string().trim().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export type SignUpValues = z.infer<typeof signUpSchema>;
 
 export const createCompetitionSchema = z
   .object({
