@@ -22,7 +22,7 @@ export async function GET(
     where.date = new Date(date);
   }
 
-  const entries = await prisma.waterEntry.findMany({
+  const entries = await prisma.entry.findMany({
     where,
     orderBy: { createdAt: "desc" },
   });
@@ -47,17 +47,48 @@ export async function POST(
     return NextResponse.json({ error: "Not a member" }, { status: 403 });
   }
 
-  const body = await request.json();
-  const { amount, date } = body;
+  const competition = await prisma.competition.findUnique({
+    where: { id: competitionId },
+    select: { metricType: true },
+  });
 
-  if (!amount || amount <= 0) {
-    return NextResponse.json({ error: "Amount must be positive" }, { status: 400 });
+  if (!competition) {
+    return NextResponse.json({ error: "Competition not found" }, { status: 404 });
   }
 
-  const entry = await prisma.waterEntry.create({
+  const body = await request.json();
+  const date = new Date(body.date || new Date().toISOString().split("T")[0]);
+
+  let amount: number;
+
+  switch (competition.metricType) {
+    case "QUANTITY": {
+      amount = Math.round(body.amount);
+      if (!amount || amount <= 0) {
+        return NextResponse.json({ error: "Amount must be positive" }, { status: 400 });
+      }
+      break;
+    }
+    case "COUNT": {
+      amount = 1;
+      break;
+    }
+    case "CHECK": {
+      const existing = await prisma.entry.findFirst({
+        where: { competitionId, userId: user.id, date },
+      });
+      if (existing) {
+        return NextResponse.json({ error: "Already completed for this date" }, { status: 400 });
+      }
+      amount = 1;
+      break;
+    }
+  }
+
+  const entry = await prisma.entry.create({
     data: {
-      amount: Math.round(amount),
-      date: new Date(date || new Date().toISOString().split("T")[0]),
+      amount,
+      date,
       userId: user.id,
       competitionId,
     },

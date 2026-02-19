@@ -7,12 +7,24 @@ datasource db {
   provider = "postgresql"
 }
 
+enum MetricType {
+  QUANTITY
+  COUNT
+  CHECK
+}
+
+enum RankingMethod {
+  TOTAL
+  CONSISTENCY
+  COMBINED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
   createdAt DateTime @default(now())
 
-  waterEntries        WaterEntry[]
+  entries             Entry[]
   competitionMembers  CompetitionMember[]
   createdCompetitions Competition[]
   email               String
@@ -35,9 +47,13 @@ model Competition {
   createdAt   DateTime @default(now())
   createdById String
 
+  metricType    MetricType    @default(QUANTITY)
+  unit          String?
+  rankingMethod RankingMethod @default(COMBINED)
+
   createdBy    User                @relation(fields: [createdById], references: [id])
   members      CompetitionMember[]
-  waterEntries WaterEntry[]
+  entries      Entry[]
 }
 
 model CompetitionMember {
@@ -52,7 +68,7 @@ model CompetitionMember {
   @@unique([userId, competitionId])
 }
 
-model WaterEntry {
+model Entry {
   id            String   @id @default(cuid())
   amount        Int
   date          DateTime @db.Date

@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { name, description, startDate, endDate } = body;
+  const { name, description, startDate, endDate, metricType, unit, rankingMethod } = body;
 
   if (!name || !startDate || !endDate) {
     return NextResponse.json({ error: "Name, start date, and end date are required" }, { status: 400 });
@@ -44,6 +44,9 @@ export async function POST(request: Request) {
       endDate: new Date(endDate),
       inviteCode: nanoid(8),
       createdById: user.id,
+      metricType: metricType || "QUANTITY",
+      unit: unit || null,
+      rankingMethod: rankingMethod || "COMBINED",
       members: {
         create: { userId: user.id },
       },

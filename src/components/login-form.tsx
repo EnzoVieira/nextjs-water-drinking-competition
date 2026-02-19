@@ -78,7 +78,7 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Water Tracker</CardTitle>
+        <CardTitle className="text-2xl">Habit Arena</CardTitle>
         <CardDescription>
           {mode === "signIn"
             ? "Sign in to your account"

@@ -12,6 +12,15 @@ export async function GET(
 
   const { competitionId } = await params;
 
+  const competition = await prisma.competition.findUnique({
+    where: { id: competitionId },
+    select: { rankingMethod: true, metricType: true },
+  });
+
+  if (!competition) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const members = await prisma.competitionMember.findMany({
     where: { competitionId },
     include: { user: { select: { id: true, name: true, image: true } } },
@@ -19,29 +28,34 @@ export async function GET(
 
   const scores: UserScore[] = await Promise.all(
     members.map(async (member) => {
-      const entries = await prisma.waterEntry.findMany({
+      const entries = await prisma.entry.findMany({
         where: { competitionId, userId: member.userId },
         select: { amount: true, date: true },
       });
 
-      const totalMl = entries.reduce((sum, e) => sum + e.amount, 0);
+      const totalAmount = entries.reduce((sum, e) => sum + e.amount, 0);
       const longestStreak = calculateStreak(entries.map((e) => e.date));
-      const { volumeScore, streakScore, combinedScore } = calculateScore(totalMl, longestStreak);
+      const { totalScore, streakScore, combinedScore, rankScore } = calculateScore(
+        totalAmount,
+        longestStreak,
+        competition.rankingMethod
+      );
 
       return {
         userId: member.user.id,
         userName: member.user.name,
         userImage: member.user.image,
-        totalMl,
+        totalAmount,
         longestStreak,
-        volumeScore,
+        totalScore,
         streakScore,
         combinedScore,
+        rankScore,
       };
     })
   );
 
-  scores.sort((a, b) => b.combinedScore - a.combinedScore);
+  scores.sort((a, b) => b.rankScore - a.rankScore);
 
   return NextResponse.json(scores);
 }

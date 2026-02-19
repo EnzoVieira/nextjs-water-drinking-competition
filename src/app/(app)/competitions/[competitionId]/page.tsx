@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
-import { WaterInput } from "@/components/water-input";
+import { EntryInput } from "@/components/entry-input";
 import { EntriesList } from "@/components/entries-list";
 import { Heatmap } from "@/components/heatmap";
 import { Leaderboard } from "@/components/leaderboard";
@@ -18,6 +18,9 @@ interface Competition {
   endDate: string;
   inviteCode: string;
   memberCount: number;
+  metricType: "QUANTITY" | "COUNT" | "CHECK";
+  unit: string | null;
+  rankingMethod: "TOTAL" | "CONSISTENCY" | "COMBINED";
   createdBy: { name: string };
 }
 
@@ -97,17 +100,35 @@ export default function CompetitionDetailPage() {
         </p>
       </div>
 
-      <WaterInput competitionId={competitionId} onEntryAdded={fetchData} />
+      <EntryInput
+        competitionId={competitionId}
+        metricType={competition.metricType}
+        unit={competition.unit}
+        todayEntries={entries}
+        onEntryAdded={fetchData}
+      />
 
       <EntriesList
         entries={entries}
         competitionId={competitionId}
+        metricType={competition.metricType}
+        unit={competition.unit}
         onEntryDeleted={fetchData}
       />
 
-      <Heatmap competitionId={competitionId} />
+      <Heatmap
+        competitionId={competitionId}
+        metricType={competition.metricType}
+        unit={competition.unit}
+      />
 
-      <Leaderboard scores={scores} currentUserId={currentUserId} />
+      <Leaderboard
+        scores={scores}
+        currentUserId={currentUserId}
+        metricType={competition.metricType}
+        unit={competition.unit}
+        rankingMethod={competition.rankingMethod}
+      />
 
       <InviteShare inviteCode={competition.inviteCode} />
     </div>

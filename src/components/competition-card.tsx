@@ -12,7 +12,15 @@ interface CompetitionCardProps {
   endDate: string;
   memberCount: number;
   userRank: number | null;
+  metricType: "QUANTITY" | "COUNT" | "CHECK";
+  unit: string | null;
 }
+
+const METRIC_LABELS: Record<string, string> = {
+  QUANTITY: "Quantity",
+  COUNT: "Count",
+  CHECK: "Check",
+};
 
 export function CompetitionCard({
   id,
@@ -21,6 +29,8 @@ export function CompetitionCard({
   endDate,
   memberCount,
   userRank,
+  metricType,
+  unit,
 }: CompetitionCardProps) {
   return (
     <Link href={`/competitions/${id}`} className="block">
@@ -33,7 +43,11 @@ export function CompetitionCard({
             {format(new Date(startDate), "MMM d")} &ndash;{" "}
             {format(new Date(endDate), "MMM d, yyyy")}
           </p>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 text-sm flex-wrap">
+            <Badge variant="outline">
+              {METRIC_LABELS[metricType]}
+              {unit ? ` (${unit})` : ""}
+            </Badge>
             <span className="text-muted-foreground">
               {memberCount} {memberCount === 1 ? "member" : "members"}
             </span>

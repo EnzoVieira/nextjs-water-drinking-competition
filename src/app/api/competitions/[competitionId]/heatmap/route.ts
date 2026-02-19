@@ -19,7 +19,7 @@ export async function GET(
   const start = startOfMonth(refDate);
   const end = endOfMonth(refDate);
 
-  const entries = await prisma.waterEntry.findMany({
+  const entries = await prisma.entry.findMany({
     where: {
       competitionId,
       userId,
@@ -34,9 +34,9 @@ export async function GET(
     dailyTotals[key] = (dailyTotals[key] || 0) + entry.amount;
   }
 
-  const result = Object.entries(dailyTotals).map(([date, totalMl]) => ({
+  const result = Object.entries(dailyTotals).map(([date, total]) => ({
     date,
-    totalMl,
+    total,
   }));
 
   return NextResponse.json(result);

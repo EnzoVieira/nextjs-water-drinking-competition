@@ -11,7 +11,7 @@ export async function DELETE(
 
   const { entryId } = await params;
 
-  const entry = await prisma.waterEntry.findUnique({
+  const entry = await prisma.entry.findUnique({
     where: { id: entryId },
   });
 
@@ -23,7 +23,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await prisma.waterEntry.delete({ where: { id: entryId } });
+  await prisma.entry.delete({ where: { id: entryId } });
 
   return NextResponse.json({ success: true });
 }

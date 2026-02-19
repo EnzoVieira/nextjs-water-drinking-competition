@@ -25,9 +25,23 @@ function getInitials(name: string) {
 interface LeaderboardProps {
   scores: UserScore[];
   currentUserId: string;
+  metricType: "QUANTITY" | "COUNT" | "CHECK";
+  unit: string | null;
+  rankingMethod: "TOTAL" | "CONSISTENCY" | "COMBINED";
 }
 
-export function Leaderboard({ scores, currentUserId }: LeaderboardProps) {
+function formatTotal(totalAmount: number, metricType: string, unit: string | null) {
+  if (metricType === "CHECK") return `${totalAmount} days`;
+  return `${totalAmount} ${unit || ""}`;
+}
+
+export function Leaderboard({
+  scores,
+  currentUserId,
+  metricType,
+  unit,
+  rankingMethod,
+}: LeaderboardProps) {
   return (
     <Card>
       <CardHeader>
@@ -44,8 +58,12 @@ export function Leaderboard({ scores, currentUserId }: LeaderboardProps) {
               <TableRow>
                 <TableHead className="w-10">#</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead className="text-right">Volume</TableHead>
-                <TableHead className="text-right">Streak</TableHead>
+                {(rankingMethod === "TOTAL" || rankingMethod === "COMBINED") && (
+                  <TableHead className="text-right">Total</TableHead>
+                )}
+                {(rankingMethod === "CONSISTENCY" || rankingMethod === "COMBINED") && (
+                  <TableHead className="text-right">Streak</TableHead>
+                )}
                 <TableHead className="text-right">Score</TableHead>
               </TableRow>
             </TableHeader>
@@ -70,14 +88,18 @@ export function Leaderboard({ scores, currentUserId }: LeaderboardProps) {
                       {score.userName}
                     </div>
                   </TableCell>
+                  {(rankingMethod === "TOTAL" || rankingMethod === "COMBINED") && (
+                    <TableCell className="text-right">
+                      {formatTotal(score.totalAmount, metricType, unit)}
+                    </TableCell>
+                  )}
+                  {(rankingMethod === "CONSISTENCY" || rankingMethod === "COMBINED") && (
+                    <TableCell className="text-right">
+                      {score.longestStreak}d
+                    </TableCell>
+                  )}
                   <TableCell className="text-right">
-                    {(score.totalMl / 1000).toFixed(1)}L
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {score.longestStreak}d
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {score.combinedScore}
+                    {score.rankScore}
                   </TableCell>
                 </TableRow>
               ))}

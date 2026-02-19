@@ -21,15 +21,29 @@ interface Entry {
 interface EntriesListProps {
   entries: Entry[];
   competitionId: string;
+  metricType: "QUANTITY" | "COUNT" | "CHECK";
+  unit: string | null;
   onEntryDeleted: () => void;
 }
 
 export function EntriesList({
   entries,
   competitionId,
+  metricType,
+  unit,
   onEntryDeleted,
 }: EntriesListProps) {
   const total = entries.reduce((sum, e) => sum + e.amount, 0);
+
+  function formatTotal() {
+    if (metricType === "CHECK") return entries.length > 0 ? "Completed" : "";
+    return `${total} ${unit || ""} total`;
+  }
+
+  function formatEntry(entry: Entry) {
+    if (metricType === "CHECK") return "Completed";
+    return `${entry.amount} ${unit || ""}`;
+  }
 
   async function handleDelete(entryId: string) {
     const res = await fetch(
@@ -50,7 +64,7 @@ export function EntriesList({
         <CardTitle>Today&apos;s Entries</CardTitle>
         <CardAction>
           <span className="text-sm font-medium text-primary">
-            {total}ml total
+            {formatTotal()}
           </span>
         </CardAction>
       </CardHeader>
@@ -70,7 +84,7 @@ export function EntriesList({
                   <span className="text-muted-foreground">
                     {format(new Date(entry.createdAt), "HH:mm")}
                   </span>
-                  <span className="font-medium">{entry.amount}ml</span>
+                  <span className="font-medium">{formatEntry(entry)}</span>
                 </div>
                 <Button
                   variant="ghost"

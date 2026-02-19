@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Water Tracker",
-  description: "Competitive drinking water tracker for office employees",
+  title: "Habit Arena",
+  description: "Competitive habit tracking platform",
 };
 
 export default function RootLayout({

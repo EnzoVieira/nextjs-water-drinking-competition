@@ -24,7 +24,7 @@ export default async function DashboardPage() {
   // Calculate user rank for each competition
   const competitionsWithRank = await Promise.all(
     memberships.map(async (m) => {
-      const entries = await prisma.waterEntry.groupBy({
+      const entries = await prisma.entry.groupBy({
         by: ["userId"],
         where: { competitionId: m.competitionId },
         _sum: { amount: true },
@@ -40,6 +40,8 @@ export default async function DashboardPage() {
         endDate: m.competition.endDate.toISOString(),
         memberCount: m.competition._count.members,
         userRank: rankIndex >= 0 ? rankIndex + 1 : null,
+        metricType: m.competition.metricType,
+        unit: m.competition.unit,
       };
     })
   );

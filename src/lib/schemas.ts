@@ -19,13 +19,26 @@ export const createCompetitionSchema = z
   .object({
     name: z.string().trim().min(1, "Name is required"),
     description: z.string().trim().optional(),
+    metricType: z.enum(["QUANTITY", "COUNT", "CHECK"]),
+    unit: z.string().trim().optional(),
+    rankingMethod: z.enum(["TOTAL", "CONSISTENCY", "COMBINED"]),
     startDate: z.string().min(1, "Start date is required"),
     endDate: z.string().min(1, "End date is required"),
   })
   .refine((data) => data.endDate >= data.startDate, {
     message: "End date must be on or after start date",
     path: ["endDate"],
-  });
+  })
+  .refine(
+    (data) => {
+      if (data.metricType !== "CHECK" && !data.unit) return false;
+      return true;
+    },
+    {
+      message: "Unit is required for Quantity and Count metrics",
+      path: ["unit"],
+    }
+  );
 
 export type CreateCompetitionValues = z.infer<typeof createCompetitionSchema>;
 
@@ -35,15 +48,15 @@ export const joinCompetitionSchema = z.object({
 
 export type JoinCompetitionValues = z.infer<typeof joinCompetitionSchema>;
 
-export const waterEntrySchema = z.object({
+export const quantityEntrySchema = z.object({
   amount: z
     .number({ error: "Enter a valid number" })
     .int("Must be a whole number")
     .positive("Must be greater than 0")
-    .max(5000, "Maximum 5000ml per entry"),
+    .max(100000, "Maximum 100,000 per entry"),
 });
 
-export type WaterEntryValues = z.infer<typeof waterEntrySchema>;
+export type QuantityEntryValues = z.infer<typeof quantityEntrySchema>;
 
 export const profileSchema = z
   .object({

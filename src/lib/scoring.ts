@@ -1,14 +1,17 @@
 import { differenceInCalendarDays } from "date-fns";
 
+export type RankingMethod = "TOTAL" | "CONSISTENCY" | "COMBINED";
+
 export interface UserScore {
   userId: string;
   userName: string;
   userImage: string | null;
-  totalMl: number;
+  totalAmount: number;
   longestStreak: number;
-  volumeScore: number;
+  totalScore: number;
   streakScore: number;
   combinedScore: number;
+  rankScore: number;
 }
 
 export function calculateStreak(dates: Date[]): number {
@@ -35,13 +38,32 @@ export function calculateStreak(dates: Date[]): number {
   return longest;
 }
 
-export function calculateScore(totalMl: number, longestStreak: number): {
-  volumeScore: number;
+export function calculateScore(
+  totalAmount: number,
+  longestStreak: number,
+  rankingMethod: RankingMethod
+): {
+  totalScore: number;
   streakScore: number;
   combinedScore: number;
+  rankScore: number;
 } {
-  const volumeScore = Math.round((totalMl / 1000) * 10) / 10;
+  const totalScore = totalAmount;
   const streakScore = longestStreak * 2;
-  const combinedScore = Math.round((volumeScore + streakScore) * 10) / 10;
-  return { volumeScore, streakScore, combinedScore };
+  const combinedScore = Math.round((totalScore + streakScore) * 10) / 10;
+
+  let rankScore: number;
+  switch (rankingMethod) {
+    case "TOTAL":
+      rankScore = totalScore;
+      break;
+    case "CONSISTENCY":
+      rankScore = streakScore;
+      break;
+    case "COMBINED":
+      rankScore = combinedScore;
+      break;
+  }
+
+  return { totalScore, streakScore, combinedScore, rankScore };
 }

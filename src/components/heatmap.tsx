@@ -16,29 +16,37 @@ import { Button } from "@/components/ui/button";
 
 interface HeatmapProps {
   competitionId: string;
+  metricType: "QUANTITY" | "COUNT" | "CHECK";
+  unit: string | null;
 }
 
 interface DayData {
   date: string;
-  totalMl: number;
+  total: number;
 }
 
-function getIntensityClass(ml: number): string {
-  if (ml === 0) return "bg-muted";
-  if (ml <= 500) return "bg-blue-200 dark:bg-blue-900";
-  if (ml <= 1000) return "bg-blue-400 dark:bg-blue-700";
-  if (ml <= 2000) return "bg-blue-600 dark:bg-blue-500";
-  return "bg-blue-800 dark:bg-blue-300";
+function getCheckIntensityClass(total: number): string {
+  if (total === 0) return "bg-muted";
+  return "bg-green-500 dark:bg-green-400";
+}
+
+function getQuantityIntensityClass(total: number, max: number): string {
+  if (total === 0) return "bg-muted";
+  const ratio = total / max;
+  if (ratio <= 0.25) return "bg-green-200 dark:bg-green-900";
+  if (ratio <= 0.5) return "bg-green-400 dark:bg-green-700";
+  if (ratio <= 0.75) return "bg-green-600 dark:bg-green-500";
+  return "bg-green-800 dark:bg-green-300";
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export function Heatmap({ competitionId }: HeatmapProps) {
+export function Heatmap({ competitionId, metricType, unit }: HeatmapProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [data, setData] = useState<DayData[]>([]);
   const [tooltip, setTooltip] = useState<{
     date: string;
-    ml: number;
+    total: number;
   } | null>(null);
 
   useEffect(() => {
@@ -53,7 +61,18 @@ export function Heatmap({ competitionId }: HeatmapProps) {
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startOffset = getDay(monthStart);
 
-  const dataMap = new Map(data.map((d) => [d.date, d.totalMl]));
+  const dataMap = new Map(data.map((d) => [d.date, d.total]));
+  const maxTotal = Math.max(...data.map((d) => d.total), 1);
+
+  function getIntensityClass(total: number): string {
+    if (metricType === "CHECK") return getCheckIntensityClass(total);
+    return getQuantityIntensityClass(total, maxTotal);
+  }
+
+  function formatTooltip(total: number): string {
+    if (metricType === "CHECK") return total > 0 ? "Completed" : "Not completed";
+    return `${total} ${unit || ""}`;
+  }
 
   return (
     <Card>
@@ -89,12 +108,12 @@ export function Heatmap({ competitionId }: HeatmapProps) {
           ))}
           {days.map((day) => {
             const dateStr = format(day, "yyyy-MM-dd");
-            const ml = dataMap.get(dateStr) || 0;
+            const total = dataMap.get(dateStr) || 0;
             return (
               <div
                 key={dateStr}
-                className={`aspect-square rounded-sm ${getIntensityClass(ml)} cursor-pointer`}
-                onMouseEnter={() => setTooltip({ date: dateStr, ml })}
+                className={`aspect-square rounded-sm ${getIntensityClass(total)} cursor-pointer`}
+                onMouseEnter={() => setTooltip({ date: dateStr, total })}
                 onMouseLeave={() => setTooltip(null)}
               />
             );
@@ -103,17 +122,18 @@ export function Heatmap({ competitionId }: HeatmapProps) {
 
         {tooltip && (
           <div className="mt-2 text-xs text-center text-muted-foreground">
-            {format(new Date(tooltip.date), "MMM d")} &mdash; {tooltip.ml}ml
+            {format(new Date(tooltip.date), "MMM d")} &mdash;{" "}
+            {formatTooltip(tooltip.total)}
           </div>
         )}
 
         <div className="flex items-center justify-end gap-1 mt-3 text-xs text-muted-foreground">
           <span>Less</span>
           <div className="w-3 h-3 rounded-sm bg-muted" />
-          <div className="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-900" />
-          <div className="w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-700" />
-          <div className="w-3 h-3 rounded-sm bg-blue-600 dark:bg-blue-500" />
-          <div className="w-3 h-3 rounded-sm bg-blue-800 dark:bg-blue-300" />
+          <div className="w-3 h-3 rounded-sm bg-green-200 dark:bg-green-900" />
+          <div className="w-3 h-3 rounded-sm bg-green-400 dark:bg-green-700" />
+          <div className="w-3 h-3 rounded-sm bg-green-600 dark:bg-green-500" />
+          <div className="w-3 h-3 rounded-sm bg-green-800 dark:bg-green-300" />
           <span>More</span>
         </div>
       </CardContent>

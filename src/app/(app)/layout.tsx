@@ -17,7 +17,7 @@ export default async function AppLayout({
       <nav className="bg-card border-b border-border">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="text-lg font-bold text-primary">
-            Water Tracker
+            Habit Arena
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
