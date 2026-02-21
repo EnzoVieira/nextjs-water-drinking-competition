@@ -3,6 +3,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { nanoid } from "nanoid";
 import { getCurrentUser } from "@/lib/auth-session";
 import { s3 } from "@/lib/s3";
+import { env } from "@/config/env";
 
 const ALLOWED_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -46,14 +47,14 @@ export async function POST(request: NextRequest) {
 
   await s3.send(
     new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET!,
+      Bucket: env.S3_BUCKET,
       Key: key,
       Body: buffer,
       ContentType: file.type,
     }),
   );
 
-  const url = `${process.env.S3_PUBLIC_URL}/${process.env.S3_BUCKET}/${key}`;
+  const url = `${env.S3_PUBLIC_URL}/${env.S3_BUCKET}/${key}`;
 
   return NextResponse.json({ url }, { status: 201 });
 }
